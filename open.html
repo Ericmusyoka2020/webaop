@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>SIM Toolkit</title>
+
+  <!-- PWA / Install as app support -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
+  
+  <!-- iOS support (optional but good) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #000;
+      color: #ffffff;
+      min-height: 100vh;
+      line-height: 1.4;
+    }
+    .header {
+      padding: 14px 16px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-bottom: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #000;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .menu {
+      list-style: none;
+    }
+    .menu li {
+      padding: 18px 16px;
+      border-bottom: 1px solid #111;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .menu li:hover { background: #1a1a1a; }
+    .menu li:active { background: #222; }
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
+      background: #000;
+      border-top: 1px solid #222;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      font-size: 1.8rem;
+      color: #666;
+      z-index: 10;
+    }
+    .bottom-bar .active {
+      color: #ffffff;
+    }
+    #installBtn {
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      background: #1db954;
+      color: #000;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 20;
+      cursor: pointer;
+    }
+    #installBtn:hover {
+      background: #1ed760;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    SIM Toolkit
+    <span style="font-size:1.4rem;">⋯</span>
+  </div>
+
+  <ul class="menu">
+    <li onclick="window.location.href='send.html'">Send Money</li>
+    <li onclick="playfulClick('Withdraw Cash')">Withdraw Cash</li>
+    <li onclick="playfulClick('Buy Airtime')">Buy Airtime</li>
+    <li onclick="playfulClick('Loans and Savings')">Loans and Savings</li>
+    <li onclick="window.location.href='lipa.html'">Lipa na M-PESA</li>
+    <li onclick="playfulClick('My Account')">My Account</li>
+  </ul>
+
+  <div style="height: 90px;"></div>
+
+  <div class="bottom-bar">
+    <span>◀</span>
+    <span class="active">○</span>
+    <span>≡</span>
+  </div>
+
+  <button id="installBtn">Install SIM Toolkit</button>
+
+  <script>
+    // Playful joke responses for unfinished features
+    function playfulClick(itemName) {
+      const jokes = [
+        "Under maintenance... come back after chai ☕😅",
+        `${itemName} went to eat nyama choma 🥩`,
+        "Service took matatu 🚐",
+        "Feature iko Coast 🏖️",
+        "Try again after M-PESA balance 😅"
+      ];
+      alert(jokes[Math.floor(Math.random() * jokes.length)]);
+    }
+
+    // ────────────────────────────────────────────────
+    //          PWA Install / "Add to Home Screen"
+    // ────────────────────────────────────────────────
+
+    let deferredPrompt = null;
+    const installBtn = document.getElementById("installBtn");
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      deferredPrompt = e;
+      // Show the install button
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+
+      // Show the install prompt
+      deferredPrompt.prompt();
+
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+
+      // Hide our custom install button
+      installBtn.style.display = 'none';
+      deferredPrompt = null;
+
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+    });
+
+    // Optional: hide button after successful install
+    window.addEventListener('appinstalled', () => {
+      installBtn.style.display = 'none';
+      deferredPrompt = null;
+      console.log('PWA was installed!');
+    });
+
+    // ────────────────────────────────────────────────
+    //               Service Worker Registration
+    // ────────────────────────────────────────────────
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch(error => {
+            console.error('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
+
+</body>
+</html>

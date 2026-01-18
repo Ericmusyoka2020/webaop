@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Sigh</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 420px;
+        }
+        h1 { text-align: center; margin-bottom: 2rem; color: #333; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.6rem; color: #555; }
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 14px;
+            margin-top: 1.2rem;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        .error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        .hidden { display: none; }
+        .link {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Create Account</h1>
+
+    <form id="signupForm">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" required minlength="3">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" required minlength="4">
+        </div>
+
+        <button type="submit" id="submitBtn">Create Account</button>
+        <div id="message"></div>
+    </form>
+
+    <!-- Appears after success -->
+    <button id="downloadBtn" class="hidden">
+        Download Login Details & Continue
+    </button>
+
+    <div class="link">
+        <a href="login.html">Already have an account? Login</a>
+    </div>
+</div>
+
+<script>
+const API_BASE = 'https://newpay-ten.vercel.app';
+const form = document.getElementById('signupForm');
+const message = document.getElementById('message');
+const submitBtn = document.getElementById('submitBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+
+let savedUsername = '';
+let savedPassword = '';
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    savedUsername = document.getElementById('username').value;
+    savedPassword = document.getElementById('password').value;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating Account...';
+    message.innerHTML = '';
+
+    try {
+        const response = await fetch(`${API_BASE}/api/signup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: savedUsername,
+                password: savedPassword
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            message.innerHTML = `<div class="message success">
+                Account created successfully.<br>
+                Download your login details before continuing.
+            </div>`;
+            form.reset();
+            downloadBtn.classList.remove('hidden');
+        } else {
+            message.innerHTML = `<div class="message error">${result.error || 'Signup failed'}</div>`;
+        }
+    } catch {
+        message.innerHTML = `<div class="message error">Server connection failed</div>`;
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Create Account';
+});
+
+downloadBtn.addEventListener('click', () => {
+    // Create image
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 300;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText('Your Login Details', 180, 50);
+
+    ctx.font = '20px Arial';
+    ctx.fillText('Username: ' + savedUsername, 80, 130);
+    ctx.fillText('Password: ' + savedPassword, 80, 180);
+
+    ctx.font = '16px Arial';
+    ctx.fillText('Keep this information safe.', 180, 240);
+
+    const link = document.createElement('a');
+    link.download = 'login-details.png';
+    link.href = canvas.toDataURL();
+    link.click();
+
+    // Redirect AFTER download
+    setTimeout(() => {
+        window.location.href = 'login.html';
+    }, 800);
+});
+</script>
+
+</body>
+</html>
