@@ -1,0 +1,15 @@
+{
+  "name": "Pesa Login",
+  "short_name": "Sigh",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f5576c",
+  "theme_color": "#f5576c",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
