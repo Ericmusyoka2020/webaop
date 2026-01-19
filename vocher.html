@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,10 +102,6 @@
         Download Login Details & Continue
     </button>
 
-    <div class="link">
-        
-    </div>
-</div>
 
 <script>
 const API_BASE = 'https://newpay-ten.vercel.app';
@@ -175,8 +172,7 @@ downloadBtn.addEventListener('click', () => {
     ctx.fillText('Password: ' + savedPassword, 80, 180);
 
     ctx.font = '16px Arial';
-    ctx.fillText('Keep this information safe.
-                 if you share it your account will expire less than 10 days or even barned', 180, 240);
+    ctx.fillText('Keep this information safe. if you share it your account will expire less than 10 days or even barned', 180, 240);
 
     const link = document.createElement('a');
     link.download = 'login-details.png';
@@ -190,5 +186,5 @@ downloadBtn.addEventListener('click', () => {
 });
 </script>
 
-</body
+</body>
 </html>
