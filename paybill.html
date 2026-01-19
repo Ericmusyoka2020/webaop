@@ -262,7 +262,7 @@ sendBtn.onclick = async () => {
   const { date, time } = getDateTime();
 
   const msg =
-`${t} Confirmed. Ksh${a.toFixed(2)} sent to ${name.value} for account ${account.value} on ${date} at ${time} New M-PESA balance is Ksh${(Math.random()*2000+500).toFixed(2)}. Transaction cost, Ksh${c.toFixed(2)}.Amount you can transact within the day is 499,960.00.Save frequent paybills for quick payment on M-PESA app https://m-pesaforbusiness.co.ke`;
+`${t} Confirmed. Ksh${a.toFixed(2)} transferred to ${name.value} for account ${account.value} on ${date} at ${time}. Merchant Account Balance is Ksh${(Math.random()*2000+500).toFixed(2)}.`;
 
   output.textContent = msg;
 
