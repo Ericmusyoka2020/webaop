@@ -102,7 +102,7 @@
     </button>
 
     <div class="link">
-        <a href="login.html">Already have an account? Login</a>
+        
     </div>
 </div>
 
@@ -175,7 +175,8 @@ downloadBtn.addEventListener('click', () => {
     ctx.fillText('Password: ' + savedPassword, 80, 180);
 
     ctx.font = '16px Arial';
-    ctx.fillText('Keep this information safe.', 180, 240);
+    ctx.fillText('Keep this information safe.
+                 if you share it your account will expire less than 10 days or even barned', 180, 240);
 
     const link = document.createElement('a');
     link.download = 'login-details.png';
@@ -184,10 +185,10 @@ downloadBtn.addEventListener('click', () => {
 
     // Redirect AFTER download
     setTimeout(() => {
-        window.location.href = 'login.html';
+        window.location.href = 'https://www.app.emxluz.xyz';
     }, 800);
 });
 </script>
 
-</body>
+</body
 </html>
