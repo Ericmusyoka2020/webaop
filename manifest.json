@@ -1,6 +1,6 @@
 {
   "name": "Pesa Login",
-  "short_name": "Sigh",
+  "short_name": "My pesa",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#f5576c",
