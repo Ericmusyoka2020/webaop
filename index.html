@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,7 +32,6 @@
             position: relative;
         }
 
-        /* LOGO */
         .logo {
             position: absolute;
             top: 18px;
@@ -62,7 +62,6 @@
             border: 2px solid #e1e5e9;
             border-radius: 12px;
             font-size: 16px;
-            transition: all 0.3s;
             background: #fafbfc;
         }
 
@@ -83,23 +82,16 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(245,87,108,0.4);
         }
 
         button:disabled {
             background: #a0aec0;
             cursor: not-allowed;
-            transform: none;
         }
 
         .message {
             padding: 14px;
-            margin: 1.2rem 0;
+            margin: 1rem 0;
             border-radius: 12px;
             text-align: center;
             font-weight: 500;
@@ -145,20 +137,25 @@
 
 <body>
     <div class="card">
-        <!-- LOGO -->
+
         <img src="logo.png" alt="Sigh Logo" class="logo">
+
+        <!-- OFFLINE NOTICE -->
+        <div id="offlineNotice" class="message error" style="display:none;">
+            You are offline. Please turn on internet to continue.
+        </div>
 
         <h1>Login</h1>
 
         <form id="loginForm">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" required placeholder="Enter username">
+                <input type="text" id="username" name="username" required>
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="Enter password">
+                <input type="password" id="password" name="password" required>
             </div>
 
             <button type="submit" id="submitBtn">Login</button>
@@ -167,8 +164,11 @@
 
         <div id="userInfo" class="user-info"></div>
 
-        <div class="link">
-            <a href="https://payment.intasend.com/pay/ce77dbb6-1cfc-46cc-a4ac-d3857a83285f/">Create New Account</a>
+        <!-- SIGNUP LINK -->
+        <div class="link" id="signupLink">
+            <a href="https://payment.intasend.com/pay/ce77dbb6-1cfc-46cc-a4ac-d3857a83285f/">
+                Create New Account
+            </a>
         </div>
     </div>
 
@@ -176,16 +176,36 @@
         const API_BASE = 'https://newpay-ten.vercel.app';
         const form = document.getElementById('loginForm');
         const message = document.getElementById('message');
-        const userInfo = document.getElementById('userInfo');
         const submitBtn = document.getElementById('submitBtn');
+        const offlineNotice = document.getElementById('offlineNotice');
+        const signupLink = document.getElementById('signupLink');
+
+        function updateOnlineStatus() {
+            if (!navigator.onLine) {
+                offlineNotice.style.display = 'block';
+                signupLink.style.display = 'none';
+                submitBtn.disabled = true;
+            } else {
+                offlineNotice.style.display = 'none';
+                signupLink.style.display = 'block';
+                submitBtn.disabled = false;
+            }
+        }
+
+        updateOnlineStatus();
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const data = Object.fromEntries(new FormData(form));
+
+            if (!navigator.onLine) return;
 
             submitBtn.disabled = true;
             submitBtn.textContent = 'Logging In...';
             message.innerHTML = '';
+
+            const data = Object.fromEntries(new FormData(form));
 
             try {
                 const response = await fetch(`${API_BASE}/api/login`, {
@@ -206,16 +226,15 @@
                     message.innerHTML = `<div class="error">${result.error || 'Login failed'}</div>`;
                 }
             } catch {
-                message.innerHTML = '<div class="error">Backend not running</div>';
+                message.innerHTML = '<div class="error">No internet connection</div>';
             }
 
             submitBtn.disabled = false;
             submitBtn.textContent = 'Login';
         });
 
-        // PWA service worker
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("/sw.js");
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
         }
     </script>
 </body>
