@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -153,11 +154,24 @@ function calculateCost(amount) {
   return 113;
 }
 
+// UPDATED: Logic to move third letter based on the date
 function generateUAToken() {
-  const chars = "KLMNOPQRSTUVWXYZ0123456789";
-  let token = "UAP";
-  for(let i = 0; i < 7; i++) token += chars[Math.floor(Math.random() * chars.length)];
-  return token;
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  
+  // Aligning Day 25 (Jan 25) to index 15 (P)
+  let index = (dayOfYear - 10) % 26;
+  if (index < 0) index += 26; 
+
+  const thirdLetter = alphabet[index]; 
+  const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
+
+  return "UA" + thirdLetter + randomSuffix;
 }
 
 function randomBalance() { 
@@ -204,7 +218,6 @@ function resetForm() {
   elements.phone.input.value = '';
   elements.amount.input.value = '';
   elements.name.input.value = '';
-  elements.output.textContent = '';
 }
 
 // Init
