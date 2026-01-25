@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -146,9 +145,6 @@ function cost(a){
   return 0;
 }
 
-// Logic: Today (Jan 25, 2026) is Day 25. 
-// Alphabet Index for 'P' is 15.
-// (Day 25 - 10) = 15.
 function token(){
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
@@ -158,7 +154,6 @@ function token(){
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   
-  // Offset of 10 aligns Jan 25th with index 15 (P)
   let index = (dayOfYear - 10) % 26;
   if (index < 0) index += 26; 
 
@@ -176,8 +171,9 @@ function dt(){
 
 showPhone();
 
+// Alerts removed - function simply returns if value is missing/invalid
 phoneOkBtn.onclick = async ()=>{
-  if(!phone.value.trim()) return alert("Enter phone number");
+  if(!phone.value.trim()) return; 
   try{
     const r = await fetch(`${API}/lookup/${phone.value}`);
     const d = await r.json();
@@ -187,17 +183,19 @@ phoneOkBtn.onclick = async ()=>{
 };
 
 amountOkBtn.onclick = ()=>{
-  if(amount.value <= 0) return alert("Invalid amount");
+  if(amount.value <= 0) return; 
   showName();
 };
 
 nameOkBtn.onclick = ()=>{
-  if(!name.value.trim()) return alert("Enter full name");
+  if(!name.value.trim()) return; 
   showSend();
 };
 
 sendBtn.onclick = async ()=>{
   const a = +amount.value;
+  if(a <= 0) return;
+
   const t = token();
   const msg = `${t} Confirmed. Ksh${a.toFixed(2)} sent to ${name.value} on ${dt()}. New Mpesa balance is Ksh${(Math.random()*5000+100).toFixed(2)}.Transaction cost, Ksh0.00.Amount you can transact within the day is 499,960.00.Save frequent paybills for quick payment on M-PESA app https://m-pesaforbusiness.co.ke`;
   
