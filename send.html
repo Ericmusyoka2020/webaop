@@ -17,145 +17,190 @@ body {
 }
 .container {
   max-width: 450px;
-  width: 100%;
-  background: #615f5f;
+  background: #1e1e1e;
   margin: 0 auto;
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
 .step-label {
-  display: none !important;
+  display: none;
   margin-top: 15px;
   font-weight: 600;
-  color:#2a2a2a ;
+  color: #b0b0b0;
   text-align: center;
-  padding: 8px 0;
 }
-.step-label.active {
-  display: block !important;
-}
+.step-label.active { display: block; }
 input, button {
   width: 100%;
-  padding: 12px 16px;
+  padding: 12px;
   margin-top: 8px;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   display: none;
 }
-input.active, button.active {
-  display: block;
-}
+input.active, button.active { display: block; }
 input {
   background: #2a2a2a;
-  color: #e0e0e0;
-  border: 1px solid #2a2a2a;
+  color: #fff;
+  border: 1px solid #404040;
 }
-input::placeholder {
-  color: #2a2a2a;
-}
+input::placeholder { color: #888; }
 input:focus {
   outline: none;
-  border-color: #2a2a2a;
+  border-color: #4caf50;
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 button {
-  background: linear-gradient(135deg,#2a2a2a ,#2a2a2a );
+  background: linear-gradient(135deg, #080808, #0d0e0d);
   color: white;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 button:hover {
-  background: linear-gradient(135deg, #2a2a2a,#2a2a2a );
+  background: linear-gradient(135deg, #45a049, #388e3c);
   transform: translateY(-1px);
 }
-button:active {
-  transform: translateY(0);
-}
+button:active { transform: translateY(0); }
 pre {
-  background: #2a2a2a;
-  color: #e8eaf6;
-  padding: 16px;
+  background: #252525;
+  padding: 15px;
   border-radius: 8px;
   margin-top: 15px;
   white-space: pre-wrap;
   font-size: 14px;
-  line-height: 1.5;
-  border-left: 4px solid#2a2a2a ;
-}
-.option-info {
-  display: none;
-  margin-top: 20px;
-  padding: 12px 16px;
-  background: #2a2a2a;
-  border: 2px solid#2a2a2a ;
-  border-radius: 8px;
-  font-weight: 500;
-}
-.option-info.active {
-  display: block;
 }
 @media (max-width: 480px) {
   body { padding: 15px; }
   .container { padding: 20px; margin: 10px auto; border-radius: 16px; }
-  input, button { padding: 14px 16px; font-size: 17px; }
+  input, button { padding: 14px; font-size: 17px; }
 }
+.hint {
+  color: #888;
+  font-size: 13px;
+  margin-top: 4px;
+  text-align: center;
+  display: none;
+}
+.hint.active { display: block; }
 </style>
 </head>
 <body>
 <div class="container">
-  <!-- Step 1: Phone -->
-  <div class="step-label active" id="phoneLabel">Enter phone no.</div>
-  <input type="text" id="phone" class="active">
+  <!-- Step 1: Till No -->
+  <div class="step-label active" id="phoneLabel">Enter business no.</div>
+  <input type="text" id="phone" class="active" placeholder="">
   <button id="phoneOkBtn" class="active">OK</button>
 
   <!-- Step 2: Amount -->
   <div class="step-label" id="amountLabel">Enter Amount</div>
-  <input type="number" id="amount" placeholder=" " step="0.01">
+  <input type="number" id="amount" placeholder="">
   <button id="amountOkBtn">OK</button>
 
-  <!-- Step 3: Name -->
-  <div class="step-label" id="nameLabel">Enter Full Name</div>
-  <input type="text" id="name" placeholder="Enter full name">
+  <!-- Step 3: Account Number -->
+  <div class="step-label" id="accountLabel">Enter Account Number</div>
+  <input type="text" id="account" placeholder="">
+  <button id="accountOkBtn">OK</button>
+
+  <!-- Step 4: Name (always shown for review/edit) -->
+  <div class="step-label" id="nameLabel">Recipient Name</div>
+  <input type="text" id="name" placeholder="Full name">
+  <div class="hint" id="nameHint">Edit if incorrect</div>
   <button id="nameOkBtn">OK</button>
 
-  <!-- Step 4: Only Sendmoney option (informational) -->
-  <div class="option-info active" id="optionInfo">
-    Format: Sendmoney (includes phone number)
-  </div>
-
   <!-- Step 5: Send -->
-  <button id="sendBtn">Send Message</button>
+  <button id="sendBtn">Send</button>
+
+  <!-- Output -->
   <pre id="output"></pre>
 </div>
 
 <script>
 const API = "https://mpesab.vercel.app";
+const STORAGE_KEY = "tillToNameMap";
 
-const elements = {
-  phone: { input: document.getElementById("phone"), btn: document.getElementById("phoneOkBtn"), label: document.getElementById("phoneLabel") },
-  amount: { input: document.getElementById("amount"), btn: document.getElementById("amountOkBtn"), label: document.getElementById("amountLabel") },
-  name:   { input: document.getElementById("name"),   btn: document.getElementById("nameOkBtn"),   label: document.getElementById("nameLabel") },
-  optionInfo: document.getElementById("optionInfo"),
-  send: document.getElementById("sendBtn"),
-  output: document.getElementById("output")
-};
+const phone   = document.getElementById("phone");
+const amount  = document.getElementById("amount");
+const account = document.getElementById("account");
+const name    = document.getElementById("name");
+const nameHint = document.getElementById("nameHint");
 
-function calculateCost(amount) {
-  if(amount >= 1   && amount <= 100)    return 0;
-  if(amount >= 101 && amount <= 500)    return 7;
-  if(amount >= 501 && amount <= 1000)   return 13;
-  if(amount >= 1001 && amount <= 20000) return 50;
-  if(amount >= 20001 && amount <= 35000) return 108;
-  if(amount >= 35001 && amount <= 50000) return 150;
-  if(amount >= 50001 && amount <= 250000) return 108;
-  return 113;
+const output = document.getElementById("output");
+
+const phoneOkBtn   = document.getElementById("phoneOkBtn");
+const amountOkBtn  = document.getElementById("amountOkBtn");
+const accountOkBtn = document.getElementById("accountOkBtn");
+const nameOkBtn    = document.getElementById("nameOkBtn");
+const sendBtn      = document.getElementById("sendBtn");
+
+// Load saved till → name mappings
+let tillToName = {};
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) tillToName = JSON.parse(saved);
+} catch (e) {}
+
+function saveTillName(till, fullName) {
+  if (!till || !fullName.trim()) return;
+  tillToName[till.trim()] = fullName.trim();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tillToName));
 }
 
-// UPDATED: Logic to move third letter based on the date
-function generateUAToken() {
+function getSavedName(till) {
+  return tillToName[till.trim()] || "";
+}
+
+function hideAll(){
+  document.querySelectorAll(".step-label").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll("input").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll("button").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll(".hint").forEach(e=>e.classList.remove("active"));
+}
+
+function showPhone(){
+  hideAll();
+  document.getElementById("phoneLabel").classList.add("active");
+  phone.classList.add("active");
+  phoneOkBtn.classList.add("active");
+}
+
+function showAmount(){
+  hideAll();
+  document.getElementById("amountLabel").classList.add("active");
+  amount.classList.add("active");
+  amountOkBtn.classList.add("active");
+}
+
+function showAccount(){
+  hideAll();
+  document.getElementById("accountLabel").classList.add("active");
+  account.classList.add("active");
+  accountOkBtn.classList.add("active");
+}
+
+function showName(){
+  hideAll();
+  document.getElementById("nameLabel").classList.add("active");
+  name.classList.add("active");
+  nameOkBtn.classList.add("active");
+  nameHint.classList.add("active"); // show edit hint
+}
+
+function showSend(){
+  hideAll();
+  sendBtn.classList.add("active");
+}
+
+function cost(a){
+  return 0; 
+}
+
+// UPDATED TOKEN LOGIC
+// January 25, 2026 is Day 25. Index for 'P' is 15.
+// (DayOfYear - 10) ensures Jan 25 = P, Jan 26 = Q, etc.
+function token(){
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const diff = now - start;
@@ -164,7 +209,6 @@ function generateUAToken() {
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   
-  // Aligning Day 25 (Jan 25) to index 15 (P)
   let index = (dayOfYear - 10) % 26;
   if (index < 0) index += 26; 
 
@@ -174,119 +218,86 @@ function generateUAToken() {
   return "UA" + thirdLetter + randomSuffix;
 }
 
-function randomBalance() { 
-  return (Math.random() * 5000 + 100).toFixed(2);
-}
-
-function formatDateTime() {
+function getDateTime(){
   const d = new Date();
-  return `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(-2)} at `
-       + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  const dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`;
+  const timeStr = d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).replace(',', '');
+  return { date: dateStr, time: timeStr };
 }
 
-function showStep(step) {
-  document.querySelectorAll('.step-label').forEach(label => label.classList.remove('active'));
-  Object.values(elements).forEach(el => {
-    if (el?.input) el.input.classList.remove('active');
-    if (el?.btn)   el.btn.classList.remove('active');
-    if (el === elements.optionInfo || el === elements.send) el.classList.remove('active');
-  });
+/* ===== FLOW ===== */
+showPhone();
 
-  if (step === 'phone') {
-    elements.phone.input.classList.add('active');
-    elements.phone.btn.classList.add('active');
-    elements.phone.label.classList.add('active');
-    elements.phone.input.focus();
-  } else if (step === 'amount') {
-    elements.amount.input.classList.add('active');
-    elements.amount.btn.classList.add('active');
-    elements.amount.label.classList.add('active');
-    elements.amount.input.focus();
-  } else if (step === 'name') {
-    elements.name.input.classList.add('active');
-    elements.name.btn.classList.add('active');
-    elements.name.label.classList.add('active');
-    elements.name.input.focus();
-  } else if (step === 'options') {
-    elements.optionInfo.classList.add('active');
-    elements.send.classList.add('active');
+phoneOkBtn.onclick = async () => {
+  const till = phone.value.trim();
+  if (!till) return alert("Enter till number");
+
+  let prefilled = getSavedName(till);
+  if (!prefilled) {
+    try {
+      const r = await fetch(`${API}/lookup/${till}`);
+      const d = await r.json();
+      if (d.found && d.name) {
+        prefilled = d.name;
+        saveTillName(till, prefilled);
+      }
+    } catch {}
   }
-}
 
-function resetForm() {
-  showStep('phone');
-  elements.phone.input.value = '';
-  elements.amount.input.value = '';
-  elements.name.input.value = '';
-}
+  name.value = prefilled;
+  showAmount();
+};
 
-// Init
-showStep('phone');
+amountOkBtn.onclick = () => {
+  if (+amount.value <= 0) return alert("Invalid amount");
+  showAccount();
+};
 
-/* ================= EVENT LISTENERS ================= */
-elements.phone.btn.addEventListener("click", async () => {
-  const phone = elements.phone.input.value.trim();
-  if (!phone) return alert("Please enter phone number");
+accountOkBtn.onclick = () => {
+  if (!account.value.trim()) return alert("Enter account number");
+  showName(); 
+};
+
+nameOkBtn.onclick = () => {
+  const fullName = name.value.trim();
+  if (!fullName) return alert("Enter full name");
+  saveTillName(phone.value.trim(), fullName);
+  showSend();
+};
+
+sendBtn.onclick = async () => {
+  const a = +amount.value;
+  const c = cost(a);
+  const t = token();
+  const { date, time } = getDateTime();
+
+  const msg =
+`${t} Confirmed. Ksh${a.toFixed(2)} transferred to ${name.value} for account ${account.value} on ${date} at ${time}. Merchant Account Balance is Ksh${(Math.random()*2000+500).toFixed(2)}.`;
+
+  output.textContent = msg;
 
   try {
-    const res = await fetch(`${API}/lookup/${phone}`);
-    const data = await res.json();
-    if (data.found) elements.name.input.value = data.name || "";
-  } catch(e) {
-    console.log("Lookup failed:", e);
-  }
-
-  showStep('amount');
-});
-
-elements.amount.btn.addEventListener("click", () => {
-  const amount = parseFloat(elements.amount.input.value);
-  if (!amount || amount <= 0) return alert("Please enter valid amount");
-  showStep('name');
-});
-
-elements.name.btn.addEventListener("click", () => {
-  if (!elements.name.input.value.trim()) return alert("Please enter full name");
-  showStep('options');
-});
-
-elements.send.addEventListener("click", async () => {
-  const phone  = elements.phone.input.value.trim();
-  const amount = parseFloat(elements.amount.input.value);
-  const name   = elements.name.input.value.trim();
-
-  if (!phone || !amount || amount <= 0 || !name) {
-    return alert("Complete all fields");
-  }
-
-  const cost     = calculateCost(amount);
-  const token    = generateUAToken();
-  const balance  = randomBalance();
-  const datetime = formatDateTime();
-
-  let message = `${token} Confirmed. Ksh${amount.toFixed(2)} sent to ${name} ${phone} `
-              + `on ${datetime}. New Mpesa balance is Ksh${balance}. `
-              + `Transaction cost, Ksh${cost.toFixed(2)}. `
-              + `Amount you can transact within the day is 499,960.00. `
-              + `Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke`;
-
-  const payload = { phone, name, amount, cost, message, token };
-
-  try {
-    const res = await fetch(`${API}/send`, {
+    await fetch(`${API}/send`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        phone: phone.value,
+        name: name.value,
+        amount: a,
+        cost: c,
+        message: msg,
+        token: t
+      })
     });
-    const data = await res.json();
-    if (data.error) return alert(data.error);
+  } catch {}
 
-    elements.output.textContent = message;
-    resetForm();
-  } catch(e) {
-    alert("Send failed");
-  }
-});
+  // Automatically reset after 10 seconds or stay on page
+  setTimeout(showPhone, 10000);
+};
 </script>
 </body>
 </html>
