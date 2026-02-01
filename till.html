@@ -162,7 +162,7 @@ function token(){
   if (index < 0) index += 26; 
 
   const thirdLetter = alphabet[index]; 
-  const randomPart = Math.random().toString(36).substring(2,7).toUpperCase();
+  const randomPart = Math.random().toString(36).substring(2,8).toUpperCase();
 
   return "UB1K" + thirdLetter + Math.floor(Math.random() * 10000) + randomPart;
 }
