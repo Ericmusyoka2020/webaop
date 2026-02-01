@@ -176,7 +176,7 @@ function generateUAToken() {
   if (index < 0) index += 26; 
   const thirdLetter = alphabet[index]; 
   const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
-  return "UA" + thirdLetter + randomSuffix;
+  return "UB1" + thirdLetter + randomSuffix;
 }
 
 function randomBalance() { 
