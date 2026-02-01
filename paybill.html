@@ -217,8 +217,8 @@ function token(){
   let index = (dayOfYear - 10) % 26;
   if (index < 0) index += 26; 
   const thirdLetter = alphabet[index]; 
-  const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
-  return "UB1" + thirdLetter + randomSuffix;
+  const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+  return "UB1K" + thirdLetter + randomSuffix;
 }
 
 function getDateTime(){
