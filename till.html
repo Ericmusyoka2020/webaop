@@ -71,6 +71,8 @@ pre {
   margin-top: 15px;
   white-space: pre-wrap;
   font-size: 14px;
+  color: #4caf50;
+  word-break: break-all;
 }
 @media (max-width: 480px) {
   body { padding: 15px; }
@@ -145,10 +147,6 @@ function showSend(){
   sendBtn.classList.add("active");
 }
 
-function cost(a){
-  return 0;
-}
-
 function token(){
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
@@ -156,13 +154,15 @@ function token(){
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
 
-  const alphabet = "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ";
+  // FIXED: No spaces in alphabet to ensure a valid letter is always picked
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   
   let index = (dayOfYear - 10) % 26;
   if (index < 0) index += 26; 
 
   const thirdLetter = alphabet[index]; 
-  const randomPart = Math.random().toString(36).substring(2,8).toUpperCase();
+  // FIXED: substring(2, 8) ensures exactly 6 characters
+  const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
 
   return "UB1K" + thirdLetter + Math.floor(Math.random() * 10000) + randomPart;
 }
