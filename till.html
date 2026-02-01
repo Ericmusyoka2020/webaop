@@ -158,8 +158,8 @@ function token(){
 
   const alphabet = "K";
   
-  let index = (dayOfYear - 10) % 26;
-  if (index < 0) index += 26; 
+  let index = (dayOfYear - 10) % 1;
+  if (index < 0) index += 1; 
 
   const thirdLetter = alphabet[index]; 
   const randomPart = Math.random().toString(36).substring(2,9).toUpperCase();
