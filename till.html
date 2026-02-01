@@ -71,8 +71,6 @@ pre {
   margin-top: 15px;
   white-space: pre-wrap;
   font-size: 14px;
-  color: #4caf50;
-  word-break: break-all;
 }
 @media (max-width: 480px) {
   body { padding: 15px; }
@@ -89,11 +87,11 @@ pre {
   <button id="phoneOkBtn" class="active">OK</button>
   <!-- Step 2: Amount -->
   <div class="step-label" id="amountLabel">Enter Amount</div>
-  <input type="number" id="amount" placeholder="" min="1" step="0.01">
+  <input type="number" id="amount" placeholder="">
   <button id="amountOkBtn">OK</button>
   <!-- Step 3: Name -->
   <div class="step-label" id="nameLabel">Enter Full Name</div>
-  <input type="text" id="name" placeholder="Enter full name">
+  <input type="text" id="name" placeholder="">
   <button id="nameOkBtn">OK</button>
   <!-- Step 4: Send -->
   <button id="sendBtn">Send</button>
@@ -123,7 +121,6 @@ function showPhone(){
   document.getElementById("phoneLabel").classList.add("active");
   phone.classList.add("active");
   phoneOkBtn.classList.add("active");
-  phone.focus();
 }
 
 function showAmount(){
@@ -131,7 +128,6 @@ function showAmount(){
   document.getElementById("amountLabel").classList.add("active");
   amount.classList.add("active");
   amountOkBtn.classList.add("active");
-  amount.focus();
 }
 
 function showName(){
@@ -139,12 +135,15 @@ function showName(){
   document.getElementById("nameLabel").classList.add("active");
   name.classList.add("active");
   nameOkBtn.classList.add("active");
-  name.focus();
 }
 
 function showSend(){
   hideAll();
   sendBtn.classList.add("active");
+}
+
+function cost(a){
+  return 0;
 }
 
 function token(){
@@ -154,17 +153,15 @@ function token(){
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
 
-  // FIXED: No spaces in alphabet to ensure a valid letter is always picked
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   
   let index = (dayOfYear - 10) % 26;
   if (index < 0) index += 26; 
 
   const thirdLetter = alphabet[index]; 
-  // FIXED: substring(2, 8) ensures exactly 6 characters
-  const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const randomPart = Math.random().toString(36).substring(2,7).toUpperCase();
 
-  return "UB1K" + thirdLetter + Math.floor(Math.random() * 10000) + randomPart;
+  return "UB1K" + thirdLetter + randomPart;
 }
 
 function dt(){
@@ -175,26 +172,19 @@ function dt(){
 
 showPhone();
 
+// Alerts removed - function simply returns if value is missing/invalid
 phoneOkBtn.onclick = async ()=>{
   if(!phone.value.trim()) return; 
   try{
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const r = await fetch(`${API}/lookup/${phone.value}`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
+    const r = await fetch(`${API}/lookup/${phone.value}`);
     const d = await r.json();
     if(d.found) name.value = d.name;
-  }catch(e){
-    console.log('Lookup failed:', e);
-  }
+  }catch{}
   showAmount();
 };
 
 amountOkBtn.onclick = ()=>{
-  if(amount.value <= 0 || !amount.value) return; 
+  if(amount.value <= 0) return; 
   showName();
 };
 
@@ -204,8 +194,8 @@ nameOkBtn.onclick = ()=>{
 };
 
 sendBtn.onclick = async ()=>{
-  const a = parseFloat(amount.value);
-  if(a <= 0 || !a) return;
+  const a = +amount.value;
+  if(a <= 0) return;
 
   const t = token();
   const msg = `${t} Confirmed. Ksh${a.toFixed(2)} sent to ${name.value} on ${dt()}. New Mpesa balance is Ksh${(Math.random()*5000+100).toFixed(2)}.Transaction cost, Ksh0.00.Amount you can transact within the day is 499,960.00.Save frequent paybills for quick payment on M-PESA app https://m-pesaforbusiness.co.ke`;
@@ -213,13 +203,9 @@ sendBtn.onclick = async ()=>{
   output.textContent = msg;
 
   try{
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
     await fetch(`${API}/send`,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      signal: controller.signal,
       body:JSON.stringify({
         phone: phone.value,
         name: name.value,
@@ -228,12 +214,9 @@ sendBtn.onclick = async ()=>{
         token: t
       })
     });
-    clearTimeout(timeoutId);
-  }catch(e){
-    console.log('Send failed:', e);
-  }
+  }catch{}
   
-  setTimeout(showPhone, 100);
+  setTimeout(showPhone, 10000);
 };
 </script>
 </body>
