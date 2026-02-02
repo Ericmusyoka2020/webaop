@@ -159,17 +159,14 @@ function calculateCost(amount) {
   return 113;
 }
 
-// Updated Token Logic: S + [Day Number] + K + [Random]
 function generateUAToken() {
   const now = new Date();
-  const day = now.getDate(); // 1, 2, 3...
-  
+  const day = now.getDate(); 
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let randomPart = "";
   for (let i = 0; i < 4; i++) {
     randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-
   return "UB" + day + "K65" + randomPart;
 }
 
@@ -177,10 +174,16 @@ function randomBalance() {
   return (Math.random() * 5000 + 100).toFixed(2);
 }
 
+// UPDATED: 12-hour clock with AM/PM
 function formatDateTime() {
   const d = new Date();
-  return `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(-2)} at `
-       + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  const dateStr = `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(-2)}`;
+  const timeStr = d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+  return `${dateStr} at ${timeStr}`;
 }
 
 function showStep(step) {
