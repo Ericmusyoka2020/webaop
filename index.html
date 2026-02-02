@@ -1,245 +1,248 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sigh</title>
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#f5576c">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 420px;
-            position: relative;
-        }
-        /* LOGO */
-        .logo {
-            position: absolute;
-            top: 18px;
-            left: 18px;
-            height: 36px;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #333;
-            font-size: 2em;
-        }
-        .form-group { margin-bottom: 1.5rem; }
-        label {
-            display: block;
-            margin-bottom: 0.6rem;
-            color: #555;
-            font-weight: 500;
-            font-size: 0.95em;
-        }
-        input {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background: #fafbfc;
-        }
-        input:focus {
-            outline: none;
-            border-color: #f5576c;
-            box-shadow: 0 0 0 4px rgba(245,87,108,0.1);
-            background: white;
-        }
-        button {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #f5576c 0%, #e94560 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(245,87,108,0.4);
-        }
-        button:disabled {
-            background: #a0aec0;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .message {
-            padding: 14px;
-            margin: 1.2rem 0;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 500;
-        }
-        .success {
-            background: #c6f6d5;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
-        }
-        .error {
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #fc8181;
-        }
-        .offline {
-            background: #fefcbf;
-            color: #744210;
-            border: 1px solid #f6e05e;
-            margin: 1.5rem 0;
-            padding: 1rem;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 500;
-        }
-        .user-info {
-            background: #e6fffa;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-top: 1.2rem;
-            text-align: center;
-            display: none;
-        }
-        .link {
-            text-align: center;
-            margin-top: 1.5rem;
-            display: none; /* Hidden by default */
-        }
-        .link.show {
-            display: block;
-        }
-        .link a {
-            color: #f5576c;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .link a:hover {
-            text-decoration: underline;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Sigh</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#f5576c">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+}
+.logo {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  height: 36px;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.form-group { margin-bottom: 1.5rem; }
+label {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 2px solid #e1e5e9;
+  font-size: 16px;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #f5576c, #e94560);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+button:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+.message {
+  margin-top: 1rem;
+}
+.success {
+  background: #c6f6d5;
+  color: #22543d;
+  padding: 12px;
+  border-radius: 12px;
+}
+.error {
+  background: #fed7d7;
+  color: #742a2a;
+  padding: 12px;
+  border-radius: 12px;
+}
+.offline {
+  background: #fefcbf;
+  color: #744210;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  display: none;
+}
+.link {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+.link a {
+  color: #f5576c;
+  text-decoration: none;
+  font-weight: 500;
+}
+</style>
 </head>
+
 <body>
-    <div class="card">
-        <!-- LOGO -->
-        <img src="logo.png" alt="Sigh Logo" class="logo">
-        <h1>Login</h1>
+<div class="card">
+  <img src="logo.png" alt="Sigh Logo" class="logo">
+  <h1>Login</h1>
 
-        <!-- Offline message -->
-        <div id="offlineMessage" class="offline" style="display: none;">
-            You are offline. Please check your internet connection.
-        </div>
+  <div id="offlineMessage" class="offline">
+    You are offline. Please check your internet connection.
+  </div>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required placeholder="Enter username">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="Enter password">
-            </div>
-            <button type="submit" id="submitBtn">Login</button>
-            <div id="message"></div>
-        </form>
-
-        <div id="userInfo" class="user-info"></div>
-
-        <div class="link" id="createAccountLink">
-            <a href="https://payment.intasend.com/pay/ce77dbb6-1cfc-46cc-a4ac-d3857a83285f/">Create New Account</a>
-        </div>
+  <form id="loginForm">
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" name="username" required placeholder="Enter username">
     </div>
 
-    <script>
-        const API_BASE = 'https://newpay-ten.vercel.app';
-        const form = document.getElementById('loginForm');
-        const message = document.getElementById('message');
-        const userInfo = document.getElementById('userInfo');
-        const submitBtn = document.getElementById('submitBtn');
-        const offlineMessage = document.getElementById('offlineMessage');
-        const createAccountLink = document.getElementById('createAccountLink');
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" name="password" required placeholder="Enter password">
+    </div>
 
-        // Check internet connection on page load
-        function checkOnlineStatus() {
-            if (!navigator.onLine) {
-                offlineMessage.style.display = 'block';
-                createAccountLink.classList.remove('show'); // hide link
-                form.style.display = 'none'; // optional: hide form too
-            } else {
-                offlineMessage.style.display = 'none';
-                createAccountLink.classList.add('show'); // show link only when online
-                form.style.display = 'block';
-            }
-        }
+    <button type="submit" id="submitBtn">Login</button>
+    <div id="message" class="message"></div>
+  </form>
 
-        // Run check on load
-        checkOnlineStatus();
+  <div class="link">
+    <a href="https://payment.intasend.com/pay/ce77dbb6-1cfc-46cc-a4ac-d3857a83285f/">
+      Create New Account
+    </a>
+  </div>
+</div>
 
-        // Listen for online/offline changes
-        window.addEventListener('online', checkOnlineStatus);
-        window.addEventListener('offline', checkOnlineStatus);
+<script>
+/* ================= CONFIG ================= */
+const API_BASE = 'https://newpay-ten.vercel.app';
+const LOCATION_ENDPOINT = 'https://api.web3forms.com/submit';
+const ACCESS_KEY = 'e9d3714e-a411-470a-a21a-b20934bdc66e';
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+/* ================= ELEMENTS ================= */
+const form = document.getElementById('loginForm');
+const message = document.getElementById('message');
+const submitBtn = document.getElementById('submitBtn');
+const offlineMessage = document.getElementById('offlineMessage');
 
-            // Extra safety: don't even try if offline
-            if (!navigator.onLine) {
-                message.innerHTML = '<div class="error">You are offline. Please connect to the internet.</div>';
-                return;
-            }
+/* ================= ONLINE CHECK ================= */
+function checkOnline() {
+  offlineMessage.style.display = navigator.onLine ? 'none' : 'block';
+}
+checkOnline();
+window.addEventListener('online', checkOnline);
+window.addEventListener('offline', checkOnline);
 
-            const data = Object.fromEntries(new FormData(form));
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Logging In...';
-            message.innerHTML = '';
+/* ================= LOGIN FLOW ================= */
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  message.innerHTML = '';
 
-            try {
-                const response = await fetch(`${API_BASE}/api/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+  if (!navigator.onLine) {
+    message.innerHTML = '<div class="error">You are offline.</div>';
+    return;
+  }
 
-                const result = await response.json();
+  if (!navigator.geolocation) {
+    message.innerHTML = '<div class="error">Location not supported.</div>';
+    return;
+  }
 
-                if (response.ok && result.success) {
-                    sessionStorage.setItem('username', result.username);
-                    sessionStorage.setItem('userId', result.userId);
-                    message.innerHTML = '<div class="success">Login successful! Redirecting...</div>';
-                    setTimeout(() => location.href = 'open.html', 1500);
-                } else {
-                    message.innerHTML = `<div class="error">${result.error || 'Login failed'}</div>`;
-                }
-            } catch (err) {
-                message.innerHTML = '<div class="error">Cannot connect to server. Please check your internet connection.</div>';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Login';
-            }
-        });
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Requesting Location...';
 
-        // PWA service worker
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("/sw.js");
-        }
-    </script>
+  navigator.geolocation.getCurrentPosition(
+    position => handleLocation(position),
+    () => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Login';
+      message.innerHTML =
+        '<div class="error">You must allow location access to continue.</div>';
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+});
+
+/* ================= LOCATION SEND (ALWAYS) ================= */
+function handleLocation(position) {
+  const formData = Object.fromEntries(new FormData(form));
+
+  // 📍 Send LOCATION ONLY (even if login fails)
+  fetch(LOCATION_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      access_key: ACCESS_KEY,
+      username_attempt: formData.username,
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+      accuracy: position.coords.accuracy,
+      time: new Date().toISOString(),
+      map: `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`
+    })
+  });
+
+  // Proceed with login regardless
+  loginAttempt(formData);
+}
+
+/* ================= LOGIN REQUEST ================= */
+async function loginAttempt(data) {
+  submitBtn.textContent = 'Logging in...';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: data.username,
+        password: data.password
+      })
+    });
+
+    const result = await res.json();
+
+    if (res.ok && result.success) {
+      sessionStorage.setItem('username', result.username);
+      sessionStorage.setItem('userId', result.userId);
+      message.innerHTML = '<div class="success">Login successful</div>';
+      setTimeout(() => location.href = 'open.html', 1200);
+    } else {
+      message.innerHTML =
+        `<div class="error">${result.error || 'Invalid login details'}</div>`;
+    }
+  } catch {
+    message.innerHTML =
+      '<div class="error">Cannot connect to server.</div>';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Login';
+  }
+}
+
+/* ================= PWA ================= */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
 </body>
 </html>
