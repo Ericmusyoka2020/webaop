@@ -135,7 +135,7 @@
             const invoiceId = data.invoice ? data.invoice.invoice_id : (data.id || null);
 
             if (invoiceId) {
-                statusDiv.innerText = "Please enter your M-Pesa PIN on your phone.Do not refresh the page.your payment will be ignored if does so";
+                statusDiv.innerText = "Please enter your M-Pesa PIN on your phone.Do not refresh the page ,your payment will be ignored if does so";
                 startPolling(invoiceId);
             } else {
                 throw new Error(data.error || "Failed to initiate payment. Check phone format.");
