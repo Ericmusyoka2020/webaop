@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,13 +42,15 @@ button{
   border-radius:12px;
   color:#fff;
   font-size:16px;
-  cursor:pointer
+  cursor:pointer;
+  transition: opacity 0.3s;
 }
 button:disabled{opacity:.6}
 .message{margin-top:1rem;padding:12px;border-radius:10px;text-align:center}
 .success{background:#c6f6d5;color:#22543d}
 .error{background:#fed7d7;color:#742a2a}
 .hidden{display:none}
+#downloadBtn { margin-top: 1rem; background: #2d3748; }
 </style>
 </head>
 
@@ -73,18 +74,20 @@ button:disabled{opacity:.6}
   </form>
 
   <button id="downloadBtn" class="hidden">
-    Download Login Details & Continue
+    Download Details & Continue
   </button>
 </div>
 
 <script>
-/* 🔴 USE LOCAL EXPRESS BACKEND */
+/* 🔴 API ENDPOINT */
 const API_BASE = 'https://newpay-1.onrender.com';
 
 const form = document.getElementById('signupForm');
 const msg = document.getElementById('message');
 const btn = document.getElementById('submitBtn');
 const downloadBtn = document.getElementById('downloadBtn');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
 
 let savedUsername = '';
 let savedPassword = '';
@@ -92,8 +95,8 @@ let savedPassword = '';
 form.addEventListener('submit', async e => {
   e.preventDefault();
 
-  savedUsername = username.value.trim();
-  savedPassword = password.value;
+  savedUsername = usernameInput.value.trim();
+  savedPassword = passwordInput.value;
 
   btn.disabled = true;
   btn.textContent = 'Creating...';
@@ -112,36 +115,42 @@ form.addEventListener('submit', async e => {
 
     msg.innerHTML = `<div class="message success">${data.message}</div>`;
     downloadBtn.classList.remove('hidden');
+    btn.classList.add('hidden'); // Hide original button once success occurs
     form.reset();
 
   } catch (err) {
     console.error(err);
     msg.innerHTML = `<div class="message error">${err.message}</div>`;
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
   }
-
-  btn.disabled = false;
-  btn.textContent = 'Create Account';
 });
 
 downloadBtn.onclick = () => {
+  // 1. Create the image file
   const c = document.createElement('canvas');
   c.width = 640; c.height = 360;
   const x = c.getContext('2d');
 
   x.fillStyle='#fff'; x.fillRect(0,0,640,360);
   x.fillStyle='#4f46e5'; x.font='bold 28px Arial';
-  x.fillText('Login Details',40,60);
+  x.fillText('Your Login Details',40,60);
 
   x.fillStyle='#111'; x.font='22px Arial';
   x.fillText(`Username: ${savedUsername}`,40,150);
   x.fillText(`Password: ${savedPassword}`,40,210);
 
-  const a=document.createElement('a');
-  a.download=`login-${Date.now()}.png`;
-  a.href=c.toDataURL();
+  // 2. Trigger download
+  const a = document.createElement('a');
+  a.download = `login-${Date.now()}.png`;
+  a.href = c.toDataURL();
   a.click();
 
-  setTimeout(()=>location.href='',1000);
+  // 3. Redirect to index.html after 1 second delay
+  msg.innerHTML = `<div class="message success">Download started. Redirecting...</div>`;
+  setTimeout(() => {
+    window.location.href = 'index.html'; 
+  }, 1000);
 };
 </script>
 </body>
