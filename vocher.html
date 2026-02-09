@@ -1,58 +1,219 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin - Funding Tool</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secure Funding - M-Ledger</title>
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .fund-box { background: #1e1e1e; border: 2px solid #4CAF50; padding: 30px; border-radius: 15px; width: 320px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #121212; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #45a049; }
-        #status { margin-top: 15px; color: #aaa; font-size: 14px; }
+        :root {
+            --primary: #4CAF50;
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0;
+            padding: 15px; /* Ensures padding on small screens */
+        }
+        .fund-box { 
+            background: var(--card); 
+            border: 2px solid var(--primary); 
+            padding: 25px; 
+            border-radius: 16px; 
+            width: 100%; 
+            max-width: 360px; /* Limits size on desktop, expands on mobile */
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+        h2 { color: var(--primary); margin: 0 0 10px 0; font-size: 1.5rem; }
+        .user-info { 
+            background: #2a2a2a; 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            margin-bottom: 20px; 
+            border: 1px solid #333;
+        }
+        .fee-info { 
+            font-size: 0.85rem; 
+            color: #ffab00; 
+            margin: 10px 0; 
+            display: none; 
+            font-weight: 500;
+        }
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            border: 1px solid #444; 
+            background: #121212; 
+            color: white; 
+            box-sizing: border-box; 
+            font-size: 16px; /* Prevents iOS auto-zoom */
+        }
+        input:focus { outline: none; border-color: var(--primary); }
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:disabled { background: #444; cursor: not-allowed; }
+        #status { margin-top: 20px; color: #aaa; font-size: 14px; line-height: 1.4; min-height: 40px; }
+        .loader {
+            display: inline-block; width: 16px; height: 16px; border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite;
+            margin-right: 8px; vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .back-link { display: block; margin-top: 20px; color: #666; text-decoration: none; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="fund-box">
-    <h2 style="color: #4CAF50; margin-top: 0;">Fund Account</h2>
-    <p>Enter details to add balance</p>
-    <input type="text" id="phone" placeholder="User Phone Number">
-    <input type="number" id="amount" placeholder="Amount (e.g. 5000)">
-    <button onclick="submitFunds()">Add Funds Now</button>
-    <p id="status"></p>
+    <h2>Fund Account</h2>
+    <div class="user-info">
+        Funding: <span id="displayPhone" style="color: var(--primary); font-weight: bold;">Loading...</span>
+    </div>
+
+    <p style="font-size: 13px; color: #888; margin-top: 0;">Min: Ksh 50.00 | Fee: 15%</p>
+
+    <input type="number" id="amount" placeholder="Amount to Add (Ksh)" oninput="updateFee()">
+    <div id="feeDisplay" class="fee-info">Total STK Push: <span id="stkPrice">0.00</span></div>
+
+    <button id="fundBtn" onclick="initiateFunding()">Pay & Add Funds</button>
+    
+    <div id="status"></div>
+    <a href="menu.html" class="back-link">← Cancel and Go Back</a>
 </div>
 
 <script>
-    async function submitFunds() {
-        const phone = document.getElementById('phone').value;
-        const amount = document.getElementById('amount').value;
-        const status = document.getElementById('status');
+    const PAY_API = "https://newpayment-srpu.onrender.com";
+    const FUND_API = "https://funds-5bhq.onrender.com/api";
+    const user = JSON.parse(localStorage.getItem('mledger_user'));
 
-        if(!phone || !amount) {
-            status.innerText = "Please fill all fields";
+    if (!user) window.location.href = 'index.html';
+    document.getElementById('displayPhone').innerText = user.phone;
+
+    function updateFee() {
+        const amt = parseFloat(document.getElementById('amount').value);
+        const feeDiv = document.getElementById('feeDisplay');
+        const stkSpan = document.getElementById('stkPrice');
+        
+        if (amt >= 50) {
+            const stk = Math.ceil(amt * 0.15);
+            feeDiv.style.display = "block";
+            stkSpan.innerText = "Ksh " + stk.toFixed(2);
+        } else {
+            feeDiv.style.display = "none";
+        }
+    }
+
+    async function initiateFunding() {
+        const amt = parseFloat(document.getElementById('amount').value);
+        const status = document.getElementById('status');
+        const btn = document.getElementById('fundBtn');
+
+        if (!amt || amt < 50) {
+            status.style.color = "#ff5252";
+            status.innerText = "Please enter at least Ksh 50";
             return;
         }
 
-        status.innerText = "Processing...";
+        const stkAmount = Math.ceil(amt * 0.15);
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loader"></span>Wait for M-Pesa...';
+        status.style.color = "#aaa";
+        status.innerText = `Requesting Ksh ${stkAmount} payment prompt...`;
 
         try {
-            const response = await fetch('https://funds-5bhq.onrender.com/api/fund', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, amount })
+            // 1. Trigger STK Push
+            const res = await fetch(`${PAY_API}/api/initiate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: stkAmount, phone_number: user.phone })
             });
-            const result = await response.json();
-            
-            if (result.message) {
-                status.style.color = "#4CAF50";
-                status.innerText = result.message;
+            const data = await res.json();
+            const invoiceId = data.invoice ? data.invoice.invoice_id : (data.id || null);
+
+            if (invoiceId) {
+                status.innerText = "Enter PIN on your phone. Do not leave this page.";
+                startPolling(invoiceId, amt);
             } else {
-                status.style.color = "#ff5252";
-                status.innerText = result.error;
+                throw new Error("STK Request failed.");
             }
         } catch (err) {
-            status.innerText = "Error: Backend not running";
+            status.style.color = "#ff5252";
+            status.innerText = "Error: " + err.message;
+            resetBtn();
         }
+    }
+
+    function startPolling(id, fundAmt) {
+        const status = document.getElementById('status');
+        let timer = setInterval(async () => {
+            try {
+                const res = await fetch(`${PAY_API}/api/status/${id}`);
+                const data = await res.json();
+                const state = data.invoice ? data.invoice.state : data.state;
+
+                if (state === "COMPLETE" || state === "COMPLETED") {
+                    clearInterval(timer);
+                    status.style.color = "#4CAF50";
+                    status.innerText = "Payment Received! Updating balance...";
+                    finalizeFunding(fundAmt);
+                } else if (state === "FAILED" || state === "REJECTED") {
+                    clearInterval(timer);
+                    status.style.color = "#ff5252";
+                    status.innerText = "Payment failed or cancelled.";
+                    resetBtn();
+                }
+            } catch (e) {}
+        }, 3000);
+    }
+
+    async function finalizeFunding(amt) {
+        const status = document.getElementById('status');
+        try {
+            const res = await fetch(`${FUND_API}/fund`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: user.phone, amount: amt })
+            });
+            const result = await res.json();
+            if (res.ok) {
+                user.balance = result.newBalance;
+                localStorage.setItem('mledger_user', JSON.stringify(user));
+                status.innerText = "✅ Account Funded Successfully!";
+                setTimeout(() => window.location.href = "menu.html", 2500);
+            }
+        } catch (err) {
+            status.innerText = "Error updating balance. Contact support.";
+        }
+    }
+
+    function resetBtn() {
+        const btn = document.getElementById('fundBtn');
+        btn.disabled = false;
+        btn.innerText = "Pay & Add Funds";
     }
 </script>
 </body>
