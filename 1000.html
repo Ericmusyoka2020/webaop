@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Change Password - M-Ledger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root { --primary: #4CAF50; --dark: #0f0f0f; --card: #1a1a1a; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: var(--dark); 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            box-sizing: border-box; 
+        }
+        .box { 
+            width: 100%; 
+            max-width: 400px; 
+            background: var(--card); 
+            padding: 30px; 
+            border-radius: 20px; 
+            border: 1px solid #333; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+        h2 { text-align: center; margin-top: 0; color: var(--primary); }
+        p.info { text-align: center; font-size: 14px; color: #aaa; margin-bottom: 20px; }
+        
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            border: 1px solid #444; 
+            background: #000; 
+            color: white; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+        input:focus { outline: none; border-color: var(--primary); }
+        
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 10px; 
+            border: none; 
+            background: var(--primary); 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 16px; 
+            transition: 0.3s; 
+            margin-top: 10px; 
+        }
+        button:disabled { background: #2e5d30; color: #888; cursor: not-allowed; }
+        
+        #status { 
+            text-align: center; 
+            margin-top: 15px; 
+            font-weight: 500; 
+            min-height: 40px; 
+            font-size: 14px; 
+        }
+        .loader { 
+            display: inline-block; 
+            width: 14px; 
+            height: 14px; 
+            border: 2px solid rgba(255,255,255,.3); 
+            border-radius: 50%; 
+            border-top-color: #fff; 
+            animation: spin 1s linear infinite; 
+            margin-right: 8px; 
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h2>Update Security PIN</h2>
+        <p class="info">Enter a new PIN to update your account.</p>
+        
+        <input id="phone" placeholder="Phone Number (Optional)" type="tel">
+        <input id="newPass" type="password" placeholder="Enter New PIN">
+        
+        <button id="updateBtn" onclick="updatePassword()">Update Password Now</button>
+        
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const API = "https://money.emxluz.xyz/api";
+
+        async function updatePassword() {
+            const btn = document.getElementById('updateBtn');
+            const status = document.getElementById('status');
+            const phone = document.getElementById('phone').value;
+            const newPassword = document.getElementById('newPass').value;
+
+            // Only validating the password field now
+            if(!newPassword) {
+                status.style.color = "#ffab00";
+                status.innerText = "Please enter a new PIN.";
+                return;
+            }
+
+            btn.innerHTML = '<span class="loader"></span>Processing...';
+            btn.disabled = true;
+            status.style.color = "#aaa";
+            status.innerText = "Connecting to server...";
+
+            try {
+                const res = await fetch(`${API}/reset-pin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        phone: phone || "", // Sends empty string if field is blank
+                        newPassword: newPassword 
+                    })
+                });
+               
+                const data = await res.json();
+
+                if (res.ok) {
+                    status.style.color = "#4CAF50";
+                    status.innerText = "✅ PIN updated successfully!";
+                } else {
+                    status.style.color = "#ffab00";
+                    status.innerText = data.error || "Update failed. Check server requirements.";
+                }
+            } catch (err) {
+                status.style.color = "#ff4444";
+                status.innerText = "Network error. Server may be down.";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Update Password Now";
+            }
+        }
+    </script>
+
+</body>
+</html>
